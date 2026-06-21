@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Wealth | Apex Strategy Terminal</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ================= THEME VARIABLES ================= */
+        :root {
+            --bg-base: #030712; --bg-card: rgba(17, 24, 39, 0.7); --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f9fafb; --text-muted: #9ca3af; --input-bg: rgba(255, 255, 255, 0.03);
+            --input-border: rgba(255, 255, 255, 0.1); --pill-bg: rgba(255, 255, 255, 0.05); --pill-border: rgba(255, 255, 255, 0.1);
+            --glow-1: rgba(16, 185, 129, 0.08); --glow-2: rgba(251, 191, 36, 0.06); --switch-bg: rgba(0, 0, 0, 0.5);
+            
+            --accent-gold: #fbbf24; --accent-green: #10b981; --accent-blue: #3b82f6; --accent-orange: #f97316;
+            --accent-red: #ef4444; --accent-purple: #8b5cf6; --accent-teal: #14b8a6;
+            --gradient-primary: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); --btn-text: #000;
+        }
+
+        body.theme-light {
+            --bg-base: #f3f4f6; --bg-card: rgba(255, 255, 255, 0.85); --card-border: rgba(0, 0, 0, 0.08);
+            --text-main: #111827; --text-muted: #4b5563; --input-bg: rgba(0, 0, 0, 0.02); --input-border: rgba(0, 0, 0, 0.1);
+            --pill-bg: rgba(0, 0, 0, 0.04); --pill-border: rgba(0, 0, 0, 0.08); --glow-1: rgba(16, 185, 129, 0.15);
+            --glow-2: rgba(59, 130, 246, 0.1); --switch-bg: rgba(229, 231, 235, 0.8);
+            --accent-gold: #d97706; --gradient-primary: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); --btn-text: #fff;
+        }
+
+        body.theme-emerald {
+            --bg-base: #022c22; --bg-card: rgba(6, 78, 59, 0.6); --card-border: rgba(52, 211, 153, 0.15);
+            --text-main: #ecfdf5; --text-muted: #a7f3d0; --input-bg: rgba(255, 255, 255, 0.03); --input-border: rgba(52, 211, 153, 0.2);
+            --pill-bg: rgba(255, 255, 255, 0.08); --pill-border: rgba(255, 255, 255, 0.15); --glow-1: rgba(52, 211, 153, 0.1);
+            --glow-2: rgba(251, 191, 36, 0.08); --switch-bg: rgba(2, 44, 34, 0.8);
+            --accent-gold: #fbbf24; --gradient-primary: linear-gradient(135deg, #10b981 0%, #047857 100%); --btn-text: #fff;
+        }
+
+        body.theme-ocean {
+            --bg-base: #0f172a; --bg-card: rgba(14, 165, 233, 0.1); --card-border: rgba(56, 189, 248, 0.15);
+            --text-main: #f0f9ff; --text-muted: #bae6fd; --input-bg: rgba(255, 255, 255, 0.03); --input-border: rgba(56, 189, 248, 0.2);
+            --pill-bg: rgba(255, 255, 255, 0.08); --pill-border: rgba(255, 255, 255, 0.15); --glow-1: rgba(14, 165, 233, 0.1);
+            --glow-2: rgba(56, 189, 248, 0.08); --switch-bg: rgba(15, 23, 42, 0.8);
+            --accent-gold: #38bdf8; --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%); --btn-text: #fff;
+        }
+
+        body.theme-cyber {
+            --bg-base: #09090b; --bg-card: rgba(217, 70, 239, 0.05); --card-border: rgba(217, 70, 239, 0.2);
+            --text-main: #faf5ff; --text-muted: #e879f9; --input-bg: rgba(255, 255, 255, 0.03); --input-border: rgba(217, 70, 239, 0.3);
+            --pill-bg: rgba(255, 255, 255, 0.05); --pill-border: rgba(217, 70, 239, 0.2); --glow-1: rgba(217, 70, 239, 0.15);
+            --glow-2: rgba(139, 92, 246, 0.1); --switch-bg: rgba(9, 9, 11, 0.8);
+            --accent-gold: #d946ef; --gradient-primary: linear-gradient(135deg, #d946ef 0%, #8b5cf6 100%); --btn-text: #fff;
+        }
+
+        /* ================= GLOBAL STYLES ================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; padding: 40px 20px; position: relative; overflow-x: hidden; transition: 0.5s ease; }
+
+        /* Nav & Theme */
+        .top-nav { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 10; align-items: center; }
+        select.currency-select { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 12px; font-family: 'Outfit'; outline: none; cursor: pointer; backdrop-filter: blur(10px); }
+        .theme-selector { display: flex; gap: 10px; background: var(--bg-card); padding: 8px 12px; border-radius: 20px; border: 1px solid var(--card-border); backdrop-filter: blur(10px); }
+        .theme-dot { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .theme-dot.active { border-color: var(--text-main); transform: scale(1.1); }
+        .dot-dark { background: #030712; border: 1px solid #4b5563; } .dot-light { background: #f3f4f6; border: 1px solid #d1d5db; }
+        .dot-emerald { background: #022c22; border: 1px solid #059669; } .dot-ocean { background: #0f172a; border: 1px solid #0ea5e9; } .dot-cyber { background: #09090b; border: 1px solid #d946ef; }
+
+        .bg-glow { position: fixed; width: 50vw; height: 50vw; background: radial-gradient(circle, var(--glow-1) 0%, rgba(0,0,0,0) 70%); top: -20%; left: -20%; border-radius: 50%; z-index: -1; animation: float 10s infinite alternate; }
+        .bg-glow-2 { position: fixed; width: 40vw; height: 40vw; background: radial-gradient(circle, var(--glow-2) 0%, rgba(0,0,0,0) 70%); bottom: -10%; right: -10%; border-radius: 50%; z-index: -1; animation: float 8s infinite alternate-reverse; }
+        @keyframes float { 0% { transform: translate(0, 0); } 100% { transform: translate(50px, 50px); } }
+
+        .app-container { max-width: 1000px; width: 100%; background: var(--bg-card); border: 1px solid var(--card-border); backdrop-filter: blur(24px); border-radius: 30px; padding: 50px; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3); position: relative; z-index: 1; margin-top: 50px; }
+
+        header { text-align: center; margin-bottom: 35px; }
+        .date-badge { display: inline-block; background: var(--pill-bg); border: 1px solid var(--pill-border); padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; color: var(--accent-gold); margin-bottom: 20px; text-transform: uppercase; font-weight: 500; }
+        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: 8px; line-height: 1.1; }
+        h1 span { background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: var(--text-muted); font-size: 1.1rem; font-weight: 300; }
+
+        /* Toggles & Inputs */
+        .mode-toggle-container { display: flex; justify-content: center; margin-bottom: 35px; }
+        .toggle-switch { display: flex; background: var(--switch-bg); border: 1px solid var(--input-border); border-radius: 16px; padding: 6px; position: relative; width: 100%; max-width: 400px; }
+        .toggle-btn { flex: 1; background: transparent; color: var(--text-muted); border: none; padding: 14px 0; font-size: 1rem; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.3s; position: relative; z-index: 2; font-family: 'Outfit'; }
+        .toggle-btn.active { color: var(--btn-text); }
+        .toggle-slider { position: absolute; top: 6px; left: 6px; width: calc(50% - 6px); height: calc(100% - 12px); background: var(--gradient-primary); border-radius: 12px; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1); z-index: 1; }
+
+        .input-section { background: var(--input-bg); border: 1px solid var(--input-border); padding: 35px; border-radius: 20px; display: flex; flex-direction: column; gap: 25px; margin-bottom: 40px; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        label.main-label { font-size: 0.95rem; font-weight: 600; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .input-wrapper { position: relative; width: 100%; }
+        .input-wrapper span.sym { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 1.5rem; color: var(--text-muted); }
+        input[type="number"] { width: 100%; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); font-size: 1.5rem; padding: 15px 15px 15px 50px; border-radius: 12px; outline: none; transition: 0.3s; font-family: 'Outfit'; font-weight: 600; }
+        input[type="number"].no-sym { padding-left: 15px; }
+        input[type="number"]:focus { background: var(--pill-bg); border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(251, 191, 36, 0.1); }
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; margin-top: 10px; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent-gold); cursor: pointer; margin-top: -6px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--input-border); border-radius: 2px; }
+
+        /* ADVANCED WEALTH SUITE (Latte, SWP, Rent v Buy) */
+        .wealth-suite { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 40px; }
+        .suite-card { background: var(--pill-bg); border: 1px solid var(--pill-border); border-radius: 16px; padding: 20px; position: relative; overflow: hidden; transition: 0.3s; }
+        .suite-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-blue); }
+        .suite-card:nth-child(2)::before { background: var(--accent-purple); }
+        .suite-card:nth-child(3)::before { background: var(--accent-green); }
+        .suite-card h3 { font-size: 1.05rem; margin-bottom: 10px; color: var(--text-main); }
+        .suite-input-group { margin-bottom: 10px; }
+        .suite-input-group label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+        .suite-input-group input, .suite-input-group select { width: 100%; padding: 8px 10px; border-radius: 8px; background: var(--input-bg); border: 1px solid var(--input-border); color: var(--text-main); font-family: 'Outfit'; outline: none; }
+        .suite-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); color: var(--text-main); padding: 8px; width: 100%; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: 500; font-family: 'Outfit'; }
+        .suite-btn:hover { background: var(--accent-gold); color: #000; }
+        .suite-result { margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; font-size: 0.9rem; display: none; }
+        .suite-result span { display: block; font-size: 1.2rem; font-weight: 700; color: var(--accent-gold); margin-top: 4px; }
+
+        /* Master Toggles */
+        .advanced-options { display: flex; flex-direction: column; gap: 15px; background: var(--pill-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--pill-border); }
+        .adv-toggle-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .adv-toggle-info { display: flex; flex-direction: column; }
+        .adv-title { font-weight: 600; font-size: 1rem; color: var(--text-main); }
+        .adv-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+        .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0;}
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider-round { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--pill-border); transition: .4s; border-radius: 24px; }
+        .slider-round:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: var(--text-main); transition: .4s; border-radius: 50%; }
+        input:checked + .slider-round { background-color: var(--accent-gold); }
+        input:checked + .slider-round:before { transform: translateX(20px); background-color: #fff; }
+        .dep-counter-wrap { display: none; align-items: center; gap: 12px; margin-top: 10px; padding: 12px 15px; background: var(--input-bg); border-radius: 10px; border: 1px dashed var(--input-border); }
+        .dep-counter-wrap input { width: 70px; padding: 8px; border-radius: 8px; font-size: 1.1rem; }
+
+        .cta-btn { background: var(--gradient-primary); color: var(--btn-text); border: none; padding: 20px; font-size: 1.15rem; font-weight: 700; border-radius: 16px; cursor: pointer; transition: 0.3s; font-family: 'Outfit'; text-transform: uppercase; letter-spacing: 1.5px; width: 100%; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .cta-btn:hover { transform: translateY(-3px); }
+
+        /* Results & Alerts */
+        .results { display: none; animation: slideUp 0.7s forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .alert-box { display: none; padding: 20px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid; }
+        .alert-box h3 { margin-bottom: 5px; display: flex; align-items: center; gap: 8px; font-family: 'Playfair Display', serif;}
+        .alert-box p { font-size: 0.95rem; line-height: 1.5; }
+        #debt-alert { background: rgba(239, 68, 68, 0.1); border-left-color: var(--accent-red); } #debt-alert h3 { color: var(--accent-red); }
+        #fire-alert { background: rgba(16, 185, 129, 0.1); border-left-color: var(--accent-green); } #fire-alert h3 { color: var(--accent-green); }
+        #fire-years { font-size: 1.5rem; font-weight: 700; color: var(--text-main); display: inline-block; margin-top: 5px;}
+        #crash-alert { background: rgba(249, 115, 22, 0.1); border-left-color: var(--accent-orange); display: none; margin-top: 20px;} #crash-alert h3 { color: var(--accent-orange); }
+        .crash-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+        .metric-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); text-align: center;}
+        .metric-val { font-size: 1.5rem; font-weight: 700; margin-top: 5px;} .text-red { color: var(--accent-red); } .text-green { color: var(--accent-green); }
+
+        .category-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+        .card { background: var(--pill-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px; position: relative; transition: 0.3s; }
+        .card:hover { transform: translateY(-4px); background: var(--input-bg); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 20px 20px 0 0; }
+        .card-protection::before { background: var(--accent-red); } .card-wealth::before { background: var(--accent-green); }
+        .card-needs::before { background: var(--accent-blue); } .card-wants::before { background: var(--accent-orange); }
+        .card-lumpsum-mf::before { background: var(--accent-purple); } .card-lumpsum-fd::before { background: var(--accent-teal); }
+        .card-lumpsum-gold::before { background: var(--accent-gold); } .card-rebalance::before { background: var(--accent-blue); }
+
+        .card-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;}
+        .card-title h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; color: var(--text-main); }
+        .card-title p { color: var(--text-muted); font-size: 0.9rem; }
+        .allocation-total { font-size: clamp(1.4rem, 4vw, 1.8rem); font-weight: 700; font-family: 'Playfair Display', serif; }
+
+        .visual-bar-container { width: 100%; height: 6px; background: var(--input-bg); border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 1px solid var(--pill-border); }
+        .visual-bar { height: 100%; border-radius: 10px; width: 0; transition: width 1s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .line-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 16px 0; border-top: 1px solid var(--pill-border); gap: 15px; }
+        .item-details { flex: 1; }
+        .item-name { font-weight: 500; font-size: 1.1rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; color: var(--text-main); }
+        .percentage-badge { background: var(--pill-bg); border: 1px solid var(--pill-border); font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; color: var(--text-muted); }
+        .item-suggest { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .item-amount { font-weight: 700; font-size: 1.2rem; text-align: right; white-space: nowrap; }
+
+        .fund-pill { display: inline-block; background: var(--pill-bg); padding: 5px 12px; border-radius: 8px; margin-top: 10px; color: var(--text-main); font-size: 0.8rem; border: 1px solid var(--pill-border); }
+        .btn-stress { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-red); color: var(--accent-red); padding: 12px 20px; border-radius: 10px; font-weight: 600; cursor: pointer; width: 100%; transition: 0.3s; margin-top: 20px;}
+        .btn-stress:hover { background: var(--accent-red); color: #fff; }
+
+        /* Chart Section with Shock */
+        .chart-container { margin-top: 40px; padding: 30px; background: var(--input-bg); border: 1px solid var(--input-border); border-radius: 20px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .chart-title h2 { font-size: 1.6rem; color: var(--accent-gold); margin-bottom: 5px; }
+        .chart-title p { font-size: 0.9rem; color: var(--text-muted); }
+        .chart-controls { display: flex; gap: 10px; flex-wrap: wrap; }
+        .chart-controls label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-main); cursor: pointer; background: var(--pill-bg); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--pill-border);}
+        .shock-wrapper { display: flex; gap: 5px; align-items: center; background: rgba(239,68,68,0.1); border: 1px solid var(--accent-red); padding: 6px; border-radius: 8px;}
+        .shock-wrapper input { background: transparent; border: none; border-bottom: 1px solid var(--accent-red); color: var(--text-main); width: 80px; font-family: 'Outfit'; outline: none;}
+        .shock-wrapper button { background: var(--accent-red); color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;}
+        canvas { max-height: 350px; }
+
+        .btn-download { display: flex; align-items: center; justify-content: center; gap: 10px; background: transparent; border: 2px solid var(--accent-gold); color: var(--accent-gold); padding: 15px; border-radius: 12px; width: 100%; margin-top: 30px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: 'Outfit'; }
+        .btn-download:hover { background: var(--accent-gold); color: #000; }
+
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .bg-glow, .bg-glow-2, .top-nav, .mode-toggle-container, .input-section, .btn-download, #action-area, .chart-controls, .btn-stress, .wealth-suite { display: none !important; }
+            .app-container { box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+            .card { break-inside: avoid; background: #fff !important; border: 1px solid #ccc !important; color: #000 !important; margin-bottom: 20px; }
+            .card-header h2, .item-name, .allocation-total, h1 { color: #000 !important; }
+            .subtitle, .item-suggest { color: #555 !important; }
+            .fund-pill { border: 1px solid #000 !important; color: #000 !important; }
+            .visual-bar-container { background: #eee !important; border: none !important; }
+            canvas { max-height: 300px !important; }
+        }
+
+        @media (max-width: 768px) {
+            .grid-inputs, .wealth-suite { grid-template-columns: 1fr; }
+            .top-nav { top: 10px; right: 10px; flex-direction: column; gap: 5px; align-items: flex-end;}
+            .app-container { padding: 30px 20px; border-radius: 20px; margin-top: 80px; }
+            .line-item { flex-direction: column; }
+            .item-amount { text-align: left; font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body class="theme-dark">
+
+<div class="top-nav">
+    <select class="currency-select" id="currency-select" onchange="updateCurrencySymbol()">
+        <option value="INR" data-sym="₹">₹ INR</option>
+        <option value="USD" data-sym="$">$ USD</option>
+        <option value="EUR" data-sym="€">€ EUR</option>
+        <option value="GBP" data-sym="£">£ GBP</option>
+    </select>
+    <div class="theme-selector">
+        <div class="theme-dot dot-dark active" onclick="setTheme('default', this)"></div>
+        <div class="theme-dot dot-ocean" onclick="setTheme('theme-ocean', this)"></div>
+        <div class="theme-dot dot-cyber" onclick="setTheme('theme-cyber', this)"></div>
+        <div class="theme-dot dot-light" onclick="setTheme('theme-light', this)"></div>
+        <div class="theme-dot dot-emerald" onclick="setTheme('theme-emerald', this)"></div>
+    </div>
+</div>
+
+<div class="bg-glow"></div>
+<div class="bg-glow-2"></div>
+
+<div class="app-container">
+    
+    <div id="print-area">
+        <header>
+            <div class="date-badge" id="current-date">Fetching Date...</div>
+            <h1>Aura <span>Wealth</span></h1>
+            <p class="subtitle" id="main-subtitle">Behavioral Predictive Wealth Simulator</p>
+        </header>
+
+        <!-- ADVANCED WEALTH SUITE MODULES -->
+        <div class="wealth-suite" data-html2canvas-ignore="true">
+            <!-- 1. Latte Factor -->
+            <div class="suite-card">
+                <h3>☕ Micro-Habit Multiplier</h3>
+                <div class="suite-input-group">
+                    <label>Amount cut per instance</label>
+                    <input type="number" id="latte-val" placeholder="e.g. 300">
+                </div>
+                <div class="suite-input-group">
+                    <select id="latte-freq">
+                        <option value="30">Daily</option>
+                        <option value="4">Weekly</option>
+                    </select>
+                </div>
+                <button class="suite-btn" onclick="calcLatte()">Calculate Future Value</button>
+                <div class="suite-result" id="latte-res">In 20 yrs at 12%: <span id="latte-out">0</span></div>
+            </div>
+
+            <!-- 2. SWP Simulator -->
+            <div class="suite-card">
+                <h3>🏖️ Retirement Paycheck</h3>
+                <div class="suite-input-group">
+                    <label>Target Retirement Corpus</label>
+                    <input type="number" id="swp-corpus" placeholder="e.g. 10000000">
+                </div>
+                <div class="suite-input-group">
+                    <label style="color:var(--text-muted); font-style:italic;">Uses Safe 4% Withdrawal Rule</label>
+                </div>
+                <button class="suite-btn" onclick="calcSWP()" style="margin-top:2px;">Calculate Safe Monthly SWP</button>
+                <div class="suite-result" id="swp-res">Safe Monthly Draw: <span id="swp-out">0</span></div>
+            </div>
+
+            <!-- 3. Rent vs Buy -->
+            <div class="suite-card">
+                <h3>🏠 Rent vs. Buy Cost</h3>
+                <div class="suite-input-group">
+                    <label>Home Price (Buy)</label>
+                    <input type="number" id="rvb-price" placeholder="e.g. 8000000">
+                </div>
+                <div class="suite-input-group">
+                    <label>Current Rent</label>
+                    <input type="number" id="rvb-rent" placeholder="e.g. 25000">
+                </div>
+                <button class="suite-btn" onclick="calcRentBuy()">Analyze Opportunity Cost</button>
+                <div class="suite-result" id="rvb-res" style="font-size:0.8rem;">
+                    15yr Net Worth:<br>
+                    Buying: <span id="rvb-buy" style="color:var(--accent-blue); font-size:1rem;"></span>
+                    Renting & Inv: <span id="rvb-rent-out" style="color:var(--accent-green); font-size:1rem;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle-container" data-html2canvas-ignore="true">
+            <div class="toggle-switch">
+                <div class="toggle-slider" id="toggle-slider"></div>
+                <button class="toggle-btn active" id="btn-salary" onclick="switchMode('salary')">Salary Splitter</button>
+                <button class="toggle-btn" id="btn-lumpsum" onclick="switchMode('lumpsum')">Lumpsum Engine</button>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section" data-html2canvas-ignore="true">
+            <div class="grid-inputs">
+                <div>
+                    <label for="income" id="input-label" class="main-label">Total Monthly Income</label>
+                    <div class="input-wrapper">
+                        <span class="sym curr-sym">₹</span>
+                        <input type="number" id="income" placeholder="e.g. 100000" min="0" oninput="syncSlider('income', 'income-slider')">
+                    </div>
+                    <input type="range" id="income-slider" min="10000" max="1000000" step="5000" value="0" oninput="syncInput('income-slider', 'income')">
+                </div>
+
+                <div id="dynamic-input-2">
+                    <label for="secondary-val" class="main-label" id="label-secondary">Current Monthly EMIs</label>
+                    <div class="input-wrapper">
+                        <span class="sym curr-sym" id="sec-sym">₹</span>
+                        <input type="number" id="secondary-val" placeholder="e.g. 15000" min="0" oninput="syncSlider('secondary-val', 'secondary-slider')">
+                    </div>
+                    <input type="range" id="secondary-slider" min="0" max="200000" step="1000" value="0" oninput="syncInput('secondary-slider', 'secondary-val')">
+                </div>
+            </div>
+
+            <!-- Advanced Options -->
+            <div class="advanced-options" id="adv-options">
+                <div class="dependent-container">
+                    <label class="adv-toggle-row">
+                        <div class="adv-toggle-info">
+                            <span class="adv-title">I have financial dependents</span>
+                            <span class="adv-desc">Expands Health Insurance protection.</span>
+                        </div>
+                        <div class="switch">
+                            <input type="checkbox" id="dep-toggle" onchange="toggleDependentCount()">
+                            <span class="slider-round"></span>
+                        </div>
+                    </label>
+                    <div class="dep-counter-wrap" id="dep-counter-wrap">
+                        <label>Enter number of dependents:</label>
+                        <input type="number" id="dep-count" min="1" max="10" value="1">
+                    </div>
+                </div>
+                
+                <label class="adv-toggle-row">
+                    <div class="adv-toggle-info">
+                        <span class="adv-title">Tax Saver Mode</span>
+                        <span class="adv-desc">Convert part of equity to Tax-Saving funds.</span>
+                    </div>
+                    <div class="switch"><input type="checkbox" id="tax-toggle"><span class="slider-round"></span></div>
+                </label>
+
+                <label class="adv-toggle-row">
+                    <div class="adv-toggle-info">
+                        <span class="adv-title">Monk Mode</span>
+                        <span class="adv-desc">Sacrifice lifestyle spending to maximize compounding.</span>
+                    </div>
+                    <div class="switch"><input type="checkbox" id="monk-toggle"><span class="slider-round"></span></div>
+                </label>
+            </div>
+
+            <button class="cta-btn" onclick="calculatePlan()">Generate Master Plan</button>
+        </div>
+
+        <div class="results" id="results">
+            
+            <!-- ALERTS -->
+            <div class="alert-box" id="fire-alert">
+                <h3>🚀 F.I.R.E. Trajectory Calculated</h3>
+                <p>Based on your automated savings rate and living expenses, you are scheduled to reach full Financial Independence in roughly:</p>
+                <div id="fire-years">0 Years</div>
+            </div>
+
+            <div class="alert-box" id="debt-alert">
+                <h3>⚠️ Debt Avalanche Protocol</h3>
+                <p>Your EMIs exceed 30% of your income. We have diverted "Guilt-Free Wants" to a <strong>Debt Payoff Engine</strong>. Do not aggressively invest in equity while drowning in high-interest debt.</p>
+            </div>
+
+            <!-- ================= SALARY MODE ================= -->
+            <div id="salary-results" class="category-grid" style="display: none;">
+                
+                <div class="card card-protection">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Protection & Moat</h2><p>First Line of Defense</p></div>
+                        <div class="allocation-total" id="s-total-protection" style="color: var(--accent-red)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-s-prot" style="background: var(--accent-red)"></div></div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Insurance Cover <span class="percentage-badge" id="lbl-insure-pct">3%</span></div>
+                            <div class="item-suggest" id="desc-insure"></div>
+                        </div>
+                        <div class="item-amount" id="s-insure" style="color: var(--accent-red)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Emergency Cash <span class="percentage-badge">2%</span></div>
+                            <div class="item-suggest">Build 6 months of baseline costs.<br><span class="fund-pill" id="s-fund-emerg"></span></div>
+                        </div>
+                        <div class="item-amount" id="s-emerg" style="color: var(--accent-red)">0</div>
+                    </div>
+                </div>
+
+                <div class="card card-wealth">
+                    <div class="card-header">
+                        <div class="card-title"><h2>The Investment Engine</h2><p>Automated Compounding</p></div>
+                        <div class="allocation-total" id="s-total-wealth" style="color: var(--accent-green)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-s-wealth" style="background: var(--accent-green)"></div></div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name" id="s-title-large">Index / Large Cap SIP <span class="percentage-badge" id="lbl-large-pct">10%</span></div>
+                            <div class="item-suggest" id="desc-large">Rock-solid market tracking.</div>
+                        </div>
+                        <div class="item-amount" id="s-large" style="color: var(--accent-green)">0</div>
+                    </div>
+                    <div class="line-item" id="s-row-flexi">
+                        <div class="item-details">
+                            <div class="item-name" id="s-title-flexi">Flexi Cap SIP <span class="percentage-badge" id="lbl-flexi-pct">10%</span></div>
+                            <div class="item-suggest" id="desc-flexi">Dynamic alpha generation.</div>
+                        </div>
+                        <div class="item-amount" id="s-flexi" style="color: var(--accent-green)">0</div>
+                    </div>
+                    <div class="line-item" id="monk-extra-funds" style="display: none;">
+                        <div class="item-details">
+                            <div class="item-name">Mid/Small Cap Aggressive <span class="percentage-badge" id="lbl-mid-pct">17%</span></div>
+                            <div class="item-suggest">Unlocked via Monk Mode.<br><span class="fund-pill" id="s-fund-small"></span></div>
+                        </div>
+                        <div class="item-amount" id="s-mid" style="color: var(--accent-green)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Digital Gold / ETF <span class="percentage-badge">5%</span></div>
+                            <div class="item-suggest">Inflation hedge.<br><span class="fund-pill" id="s-fund-gold"></span></div>
+                        </div>
+                        <div class="item-amount" id="s-gold" style="color: var(--accent-green)">0</div>
+                    </div>
+                </div>
+
+                <div class="card card-needs">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Essential Needs & Debt</h2><p>Non-Negotiable Costs</p></div>
+                        <div class="allocation-total" id="s-total-needs" style="color: var(--accent-blue)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-s-needs" style="background: var(--accent-blue)"></div></div>
+                    <div class="line-item" id="row-debt-payoff" style="display: none;">
+                        <div class="item-details">
+                            <div class="item-name">Debt Avalanche Payoff <span class="percentage-badge" id="lbl-debt-pct"></span></div>
+                            <div class="item-suggest">Aggressive clearance of EMIs.</div>
+                        </div>
+                        <div class="item-amount" id="s-debt-payoff" style="color: var(--accent-blue)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Housing & Utilities <span class="percentage-badge" id="lbl-house-pct">30%</span></div>
+                        </div>
+                        <div class="item-amount" id="s-house" style="color: var(--accent-blue)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Food & Groceries <span class="percentage-badge" id="lbl-food-pct">20%</span></div>
+                        </div>
+                        <div class="item-amount" id="s-food" style="color: var(--accent-blue)">0</div>
+                    </div>
+                </div>
+
+                <div class="card card-wants" id="card-wants">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Guilt-Free Lifestyle</h2><p>Conscious Spending Buffer</p></div>
+                        <div class="allocation-total" id="s-total-wants" style="color: var(--accent-orange)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-s-wants" style="background: var(--accent-orange)"></div></div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Entertainment & Hobbies <span class="percentage-badge" id="lbl-wants-pct">20%</span></div>
+                            <div class="item-suggest">Spend entirely with zero remorse.</div>
+                        </div>
+                        <div class="item-amount" id="s-lifestyle" style="color: var(--accent-orange)">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= LUMPSUM MODE ================= -->
+            <div id="lumpsum-results" class="category-grid" style="display: none;">
+                
+                <div class="card card-lumpsum-mf">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Maximized Equity</h2><p id="l-equity-desc">Age-Adjusted Diversification</p></div>
+                        <div class="allocation-total" id="l-total-mf" style="color: var(--accent-purple)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-l-mf" style="background: var(--accent-purple)"></div></div>
+                    
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Flexi / Multi Cap <span class="percentage-badge" id="l-lbl-flexi"></span></div>
+                            <div class="item-suggest">Tactical equity shifting.<br><span class="fund-pill" id="l-fund-flexi"></span></div>
+                        </div>
+                        <div class="item-amount" id="l-flexi" style="color: var(--accent-purple)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Large Cap / Index <span class="percentage-badge" id="l-lbl-large"></span></div>
+                            <div class="item-suggest">Structural ballast.<br><span class="fund-pill" id="l-fund-large"></span></div>
+                        </div>
+                        <div class="item-amount" id="l-large" style="color: var(--accent-purple)">0</div>
+                    </div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Mid & Small Cap <span class="percentage-badge" id="l-lbl-small"></span></div>
+                            <div class="item-suggest">High-velocity compounding.<br><span class="fund-pill" id="l-fund-small"></span></div>
+                        </div>
+                        <div class="item-amount" id="l-small" style="color: var(--accent-purple)">0</div>
+                    </div>
+                </div>
+
+                <div class="card card-lumpsum-fd">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Fixed Income Safety Net</h2><p>Capital Preservation</p></div>
+                        <div class="allocation-total" id="l-total-fd" style="color: var(--accent-teal)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-l-fd" style="background: var(--accent-teal)"></div></div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">High-Yield Bonds / FD <span class="percentage-badge" id="l-lbl-fd"></span></div>
+                            <div class="item-suggest">Locked away from market forces.<br><span class="fund-pill" id="l-fund-fd"></span></div>
+                        </div>
+                        <div class="item-amount" id="l-fd-val" style="color: var(--accent-teal)">0</div>
+                    </div>
+                </div>
+
+                <div class="card card-lumpsum-gold">
+                    <div class="card-header">
+                        <div class="card-title"><h2>Anti-Fragile Hedge</h2><p>Geopolitical Shield</p></div>
+                        <div class="allocation-total" id="l-total-gold" style="color: var(--accent-gold)">0</div>
+                    </div>
+                    <div class="visual-bar-container"><div class="visual-bar" id="bar-l-gold" style="background: var(--accent-gold)"></div></div>
+                    <div class="line-item">
+                        <div class="item-details">
+                            <div class="item-name">Gold ETFs <span class="percentage-badge">10%</span></div>
+                            <div class="item-suggest">Moves opposite to fiat currency erosion.<br><span class="fund-pill" id="l-fund-gold"></span></div>
+                        </div>
+                        <div class="item-amount" id="l-gold-val" style="color: var(--accent-gold)">0</div>
+                    </div>
+                </div>
+
+                <!-- Rebalance Info Card -->
+                <div class="card card-rebalance">
+                    <div class="card-header" style="margin-bottom:5px;">
+                        <div class="card-title"><h2>⚖️ Portfolio Rebalancing Map</h2></div>
+                    </div>
+                    <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Set a calendar reminder for 1 year from today. If your Equity grows to exceed your target split by >5%, <strong>sell the profit and buy more Fixed Deposits/Gold.</strong> This forces you to systemically "Sell High and Buy Low", locking in market gains.</p>
+                </div>
+
+                <button class="btn-stress" onclick="runStressTest()">🧨 Simulate 30% Market Crash</button>
+                <div class="alert-box" id="crash-alert">
+                    <h3>Market Stress Test Result</h3>
+                    <p>In a severe crisis, Equities drop 30%, Gold rises 15%, and FDs remain stable. See how your Anti-Fragile Hedge protects your total net worth:</p>
+                    <div class="crash-metrics">
+                        <div class="metric-box">
+                            <div class="text-muted">Equity Loss</div>
+                            <div class="metric-val text-red">-30%</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="text-muted">Total Portfolio Drop</div>
+                            <div class="metric-val text-green" id="crash-port">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Section -->
+            <div class="chart-container" id="chart-section" style="display: none;">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <h2>10-Year Wealth Predictor</h2>
+                        <p>Based on a conservative 12% baseline return on your Investment Engine.</p>
+                    </div>
+                    <div class="chart-controls">
+                        <label id="toggle-stepup-container"><input type="checkbox" id="chart-stepup" onchange="triggerChartRender()"> 10% Annual Step-up</label>
+                        <label><input type="checkbox" id="chart-inflation" onchange="triggerChartRender()"> Adj. 6% Inflation</label>
+                        
+                        <!-- Major Life Event Shock Input -->
+                        <div class="shock-wrapper" id="shock-wrapper">
+                            <span style="font-size:0.8rem;">Add Expense Year 5:</span>
+                            <input type="number" id="shock-val" placeholder="Amount">
+                            <button onclick="triggerChartRender()">Apply</button>
+                        </div>
+                    </div>
+                </div>
+                <canvas id="wealthChart"></canvas>
+            </div>
+
+        </div> <!-- End Print Area -->
+
+        <div id="action-area" style="display: none;" data-html2canvas-ignore="true">
+            <button class="btn-download" onclick="window.print()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                Print / Save Blueprint as PDF
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // --- Global State ---
+    let currentMode = 'salary';
+    let currentSymbol = '₹';
+    let currentCurrency = 'INR';
+    let wealthChartInstance = null;
+    let finalBars = {};
+    let globalInvestable = 0; 
+
+    const globalFunds = {
+        'INR': { large: "UTI Nifty 50 Index", flexi: "Parag Parikh Flexi", small: "Nippon India Small Cap", elss: "Quant ELSS", emerg: "AU Small Finance FD", gold: "Nippon Gold BeES", insure: "HDFC Ergo Optima" },
+        'USD': { large: "Vanguard S&P 500 (VOO)", flexi: "Vanguard Total Stock", small: "iShares Russell 2000", elss: "Pre-Tax 401(k)", emerg: "Marcus High Yield", gold: "SPDR Gold Trust", insure: "State Farm Term Life" },
+        'EUR': { large: "iShares Core MSCI Europe", flexi: "Vanguard FTSE All-World", small: "Xtrackers MSCI Small Cap", elss: "Tax-Advantaged Pension", emerg: "N26 High Yield", gold: "Xetra-Gold", insure: "Allianz Comprehensive" },
+        'GBP': { large: "Vanguard FTSE 100", flexi: "Vanguard Global All Cap", small: "iShares UK Small Cap", elss: "Stocks & Shares ISA", emerg: "Starling Saver", gold: "Invesco Physical Gold", insure: "Aviva Cover" }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const d = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('current-date').textContent = "As of: " + d;
+    });
+
+    function syncSlider(inputId, sliderId) { document.getElementById(sliderId).value = document.getElementById(inputId).value || 0; }
+    function syncInput(sliderId, inputId) { 
+        document.getElementById(inputId).value = document.getElementById(sliderId).value; 
+        document.getElementById(inputId).classList.add('no-sym');
+    }
+
+    function setTheme(themeName, element) {
+        document.body.className = '';
+        if (themeName !== 'default') document.body.classList.add(themeName);
+        document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('active'));
+        element.classList.add('active');
+    }
+
+    function updateCurrencySymbol() {
+        const select = document.getElementById('currency-select');
+        currentCurrency = select.value;
+        currentSymbol = select.options[select.selectedIndex].getAttribute('data-sym');
+        document.querySelectorAll('.curr-sym').forEach(el => { if(el.style.display !== 'none') el.textContent = currentSymbol; });
+        if(document.getElementById('results').style.display === 'block') calculatePlan();
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        const slider = document.getElementById('toggle-slider');
+        const inputLabel = document.getElementById('input-label');
+        const secondaryLabel = document.getElementById('label-secondary');
+        const secondaryInput = document.getElementById('secondary-val');
+        const secondarySlider = document.getElementById('secondary-slider');
+        const secSym = document.getElementById('sec-sym');
+        
+        document.getElementById('results').style.display = 'none';
+        document.getElementById('action-area').style.display = 'none';
+        document.getElementById('income').value = '';
+        secondaryInput.value = '';
+        secondaryInput.classList.remove('no-sym');
+        document.getElementById('income').classList.remove('no-sym');
+
+        if (mode === 'salary') {
+            slider.style.transform = 'translateX(0)';
+            document.getElementById('btn-salary').classList.add('active');
+            document.getElementById('btn-lumpsum').classList.remove('active');
+            inputLabel.textContent = 'Total Monthly Income';
+            secondaryLabel.textContent = 'Current Monthly EMIs';
+            secondaryInput.placeholder = "e.g. 15000";
+            secSym.style.display = 'block';
+            document.getElementById('income-slider').max = 500000;
+            secondarySlider.max = 200000; secondarySlider.step = 1000;
+            document.getElementById('adv-options').style.display = 'flex';
+            document.getElementById('toggle-stepup-container').style.display = 'flex';
+            document.getElementById('shock-wrapper').style.display = 'flex';
+        } else {
+            slider.style.transform = 'translateX(100%)';
+            document.getElementById('btn-lumpsum').classList.add('active');
+            document.getElementById('btn-salary').classList.remove('active');
+            inputLabel.textContent = 'Total Lumpsum Capital';
+            secondaryLabel.textContent = 'Your Current Age';
+            secondaryInput.placeholder = "e.g. 30";
+            secSym.style.display = 'none'; 
+            secondaryInput.classList.add('no-sym');
+            document.getElementById('income-slider').max = 10000000;
+            secondarySlider.max = 100; secondarySlider.step = 1;
+            document.getElementById('adv-options').style.display = 'none';
+            document.getElementById('toggle-stepup-container').style.display = 'none';
+            document.getElementById('shock-wrapper').style.display = 'none';
+        }
+    }
+
+    const formatCurr = (amount) => currentSymbol + " " + amount.toLocaleString('en-US', {maximumFractionDigits: 0});
+
+    function animateBars() {
+        const bars = document.querySelectorAll('.visual-bar');
+        bars.forEach(bar => bar.style.width = '0%');
+        setTimeout(() => { for (const [id, pct] of Object.entries(finalBars)) { const el = document.getElementById(id); if(el) el.style.width = pct + '%'; } }, 100); 
+    }
+
+    // --- Advanced Suite Calculators ---
+    function calcLatte() {
+        const val = parseFloat(document.getElementById('latte-val').value);
+        const freq = parseInt(document.getElementById('latte-freq').value);
+        if(!val) return;
+        const monthly = val * freq; // 30 or 4
+        // FV over 20 years at 12%
+        const rate = 0.12/12; const n = 20*12;
+        const fv = monthly * ((Math.pow(1+rate, n)-1)/rate) * (1+rate);
+        document.getElementById('latte-res').style.display = 'block';
+        document.getElementById('latte-out').textContent = formatCurr(Math.round(fv));
+    }
+
+    function calcSWP() {
+        const corpus = parseFloat(document.getElementById('swp-corpus').value);
+        if(!corpus) return;
+        const monthlyDraw = (corpus * 0.04) / 12; // 4% rule
+        document.getElementById('swp-res').style.display = 'block';
+        document.getElementById('swp-out').textContent = formatCurr(Math.round(monthlyDraw));
+    }
+
+    function calcRentBuy() {
+        const price = parseFloat(document.getElementById('rvb-price').value);
+        const rent = parseFloat(document.getElementById('rvb-rent').value);
+        if(!price || !rent) return;
+        
+        const dp = price * 0.20;
+        const loan = price - dp;
+        const r = 0.085/12; const n = 15*12;
+        const emi = loan * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1);
+        
+        // Buy: Prop Appreciates at 6% over 15yrs. Loan is paid off.
+        const buyNetWorth = price * Math.pow(1.06, 15);
+        
+        // Rent: DP is invested at 12%. EMI diff invested at 12%.
+        const invRate = 0.12/12;
+        let dpGrown = dp * Math.pow(1+0.12, 15);
+        let monthlyDiff = emi - rent; 
+        if(monthlyDiff < 0) monthlyDiff = 0; // if rent is somehow higher than emi
+        let sipGrown = monthlyDiff * ((Math.pow(1+invRate, n)-1)/invRate) * (1+invRate);
+        const rentNetWorth = dpGrown + sipGrown;
+
+        document.getElementById('rvb-res').style.display = 'block';
+        document.getElementById('rvb-buy').textContent = formatCurr(Math.round(buyNetWorth));
+        document.getElementById('rvb-rent-out').textContent = formatCurr(Math.round(rentNetWorth));
+    }
+
+    function runStressTest() {
+        const amount = parseFloat(document.getElementById('income').value) || 0;
+        let age = parseFloat(document.getElementById('secondary-val').value) || 30; 
+        let equityPct = Math.max(0.20, Math.min(0.85, (120 - age) / 100));
+        let debtPct = (1 - equityPct) - 0.10; 
+        
+        let crashEq = (amount * equityPct) * 0.70; 
+        let crashFd = (amount * debtPct) * 1.0;  
+        let crashGold = (amount * 0.10) * 1.15; 
+        let totalDropPct = ((amount - (crashEq + crashFd + crashGold)) / amount) * 100;
+
+        document.getElementById('crash-alert').style.display = 'block';
+        document.getElementById('crash-port').textContent = `-${totalDropPct.toFixed(1)}%`;
+    }
+
+    // --- Main Calculation ---
+    function calculatePlan() {
+        const amount = parseFloat(document.getElementById('income').value);
+        const secondary = parseFloat(document.getElementById('secondary-val').value) || 0;
+        if (isNaN(amount) || amount <= 0) return alert("Please enter a valid primary amount.");
+
+        const funds = globalFunds[currentCurrency];
+        
+        document.getElementById('debt-alert').style.display = 'none';
+        document.getElementById('fire-alert').style.display = 'none';
+        document.getElementById('crash-alert').style.display = 'none';
+
+        if (currentMode === 'salary') {
+            document.getElementById('salary-results').style.display = 'grid';
+            document.getElementById('lumpsum-results').style.display = 'none';
+
+            const emiRatio = secondary / amount;
+            const isHighDebt = emiRatio > 0.30;
+            const isMonk = document.getElementById('monk-toggle').checked;
+            const isTax = document.getElementById('tax-toggle').checked;
+
+            let p_needs = 0.50; let p_emerg = 0.02; let p_gold = 0.05;
+            let p_insure = 0.03; let p_prot_total = p_insure + p_emerg; 
+            let p_wants = 0.20; let p_wealth_total = 1 - (p_prot_total + p_needs + p_wants); 
+
+            document.getElementById('row-debt-payoff').style.display = 'none';
+            document.getElementById('s-title-large').innerHTML = `Index / Large Cap SIP <span class="percentage-badge" id="lbl-large-pct"></span>`;
+
+            if (isHighDebt) {
+                document.getElementById('debt-alert').style.display = 'block';
+                document.getElementById('row-debt-payoff').style.display = 'flex';
+                let debtPayoffPct = emiRatio; let remainingNeeds = p_needs - emiRatio; 
+                p_wants = 0; p_wealth_total = 0.05; 
+                document.getElementById('s-debt-payoff').textContent = formatCurr(amount * debtPayoffPct);
+                document.getElementById('lbl-debt-pct').textContent = (debtPayoffPct*100).toFixed(0) + "%";
+                p_needs = remainingNeeds > 0.2 ? remainingNeeds : 0.2; 
+            } else {
+                if (isMonk) { p_wealth_total += p_wants; p_wants = 0; }
+                document.getElementById('fire-alert').style.display = 'block';
+                let annualExp = (amount * p_needs) * 12;
+                let fireTarget = annualExp * 25; 
+                let annualSav = (amount * p_wealth_total) * 12;
+                let yearsToFire = Math.log((fireTarget * 0.12) / annualSav + 1) / Math.log(1 + 0.12);
+                document.getElementById('fire-years').textContent = yearsToFire > 0 ? yearsToFire.toFixed(1) + " Years" : "Never";
+            }
+
+            globalInvestable = amount * p_wealth_total;
+
+            let p_large = p_wealth_total * 0.4; let p_flexi = p_wealth_total * 0.4; let p_mid_small = p_wealth_total * 0.2;
+
+            if(isTax) {
+                document.getElementById('s-title-large').innerHTML = `Tax-Saver Fund <span class="percentage-badge" id="lbl-large-pct"></span>`;
+                document.getElementById('desc-large').innerHTML = `Locked tax-advantage growth.<br><span class="fund-pill">${funds.elss}</span>`;
+            } else {
+                document.getElementById('desc-large').innerHTML = `Rock-solid market tracking.<br><span class="fund-pill">${funds.large}</span>`;
+            }
+            
+            document.getElementById('desc-flexi').innerHTML = `Dynamic alpha generation.<br><span class="fund-pill">${funds.flexi}</span>`;
+            document.getElementById('s-fund-emerg').textContent = funds.emerg;
+            document.getElementById('s-fund-gold').textContent = funds.gold;
+            document.getElementById('s-fund-small').textContent = funds.small;
+
+            document.getElementById('s-total-protection').textContent = formatCurr(amount * p_prot_total);
+            document.getElementById('s-insure').textContent = formatCurr(amount * p_insure);
+            document.getElementById('lbl-insure-pct').textContent = (p_insure * 100).toFixed(1) + "%";
+            document.getElementById('desc-insure').innerHTML = `Base personal cover.<br><span class='fund-pill'>${funds.insure}</span>`;
+            document.getElementById('s-emerg').textContent = formatCurr(amount * p_emerg);
+
+            document.getElementById('s-total-wealth').textContent = formatCurr(globalInvestable);
+            document.getElementById('s-large').textContent = formatCurr(amount * p_large);
+            document.getElementById('lbl-large-pct').textContent = (p_large * 100).toFixed(1) + "%";
+            document.getElementById('s-flexi').textContent = formatCurr(amount * p_flexi);
+            document.getElementById('lbl-flexi-pct').textContent = (p_flexi * 100).toFixed(1) + "%";
+            document.getElementById('s-gold').textContent = formatCurr(amount * p_gold);
+            
+            if(p_mid_small > 0.01 && !isHighDebt) { 
+                document.getElementById('monk-extra-funds').style.display = 'flex';
+                document.getElementById('s-mid').textContent = formatCurr(amount * p_mid_small);
+                document.getElementById('lbl-mid-pct').textContent = (p_mid_small * 100).toFixed(1) + "%";
+            } else { document.getElementById('monk-extra-funds').style.display = 'none'; }
+
+            document.getElementById('s-total-needs').textContent = formatCurr(amount * (isHighDebt ? (p_needs+emiRatio) : p_needs));
+            document.getElementById('s-house').textContent = formatCurr(amount * (p_needs * 0.6));
+            document.getElementById('lbl-house-pct').textContent = (p_needs * 60).toFixed(0) + "%";
+            document.getElementById('s-food').textContent = formatCurr(amount * (p_needs * 0.4));
+            document.getElementById('lbl-food-pct').textContent = (p_needs * 40).toFixed(0) + "%";
+
+            if (p_wants > 0.001) {
+                document.getElementById('card-wants').style.display = 'block';
+                document.getElementById('s-total-wants').textContent = formatCurr(amount * p_wants);
+                document.getElementById('s-lifestyle').textContent = formatCurr(amount * p_wants);
+                document.getElementById('lbl-wants-pct').textContent = (p_wants * 100).toFixed(1) + "%";
+            } else { document.getElementById('card-wants').style.display = 'none'; }
+
+            finalBars = { 'bar-s-prot': p_prot_total * 100, 'bar-s-wealth': p_wealth_total * 100, 'bar-s-needs': p_needs * 100, 'bar-s-wants': p_wants * 100 };
+
+        } else {
+            document.getElementById('salary-results').style.display = 'none';
+            document.getElementById('lumpsum-results').style.display = 'grid';
+
+            let age = secondary > 0 ? secondary : 30; 
+            let equityPct = Math.max(0.20, Math.min(0.85, (120 - age) / 100));
+            let debtPct = (1 - equityPct) - 0.10; 
+            let goldPct = 0.10;
+
+            document.getElementById('l-equity-desc').textContent = `Age ${age} Adjusted Split`;
+
+            let e_large = equityPct * (age > 45 ? 0.5 : 0.3);
+            let e_flexi = equityPct * 0.4;
+            let e_small = equityPct - (e_large + e_flexi);
+
+            document.getElementById('l-total-mf').textContent = formatCurr(amount * equityPct);
+            document.getElementById('l-flexi').textContent = formatCurr(amount * e_flexi);
+            document.getElementById('l-lbl-flexi').textContent = (e_flexi*100).toFixed(0) + "%";
+            document.getElementById('l-large').textContent = formatCurr(amount * e_large);
+            document.getElementById('l-lbl-large').textContent = (e_large*100).toFixed(0) + "%";
+            document.getElementById('l-small').textContent = formatCurr(amount * e_small);
+            document.getElementById('l-lbl-small').textContent = (e_small*100).toFixed(0) + "%";
+
+            document.getElementById('l-total-fd').textContent = formatCurr(amount * debtPct);
+            document.getElementById('l-fd-val').textContent = formatCurr(amount * debtPct);
+            document.getElementById('l-lbl-fd').textContent = (debtPct*100).toFixed(0) + "%";
+
+            document.getElementById('l-total-gold').textContent = formatCurr(amount * goldPct);
+            document.getElementById('l-gold-val').textContent = formatCurr(amount * goldPct);
+
+            document.getElementById('l-fund-flexi').textContent = funds.flexi;
+            document.getElementById('l-fund-large').textContent = funds.large;
+            document.getElementById('l-fund-small').textContent = funds.small;
+            document.getElementById('l-fund-fd').textContent = funds.emerg;
+            document.getElementById('l-fund-gold').textContent = funds.gold;
+
+            globalInvestable = amount; 
+            finalBars = { 'bar-l-mf': equityPct*100, 'bar-l-fd': debtPct*100, 'bar-l-gold': goldPct*100 };
+        }
+
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('action-area').style.display = 'block';
+        animateBars();
+
+        document.getElementById('chart-section').style.display = 'block';
+        triggerChartRender();
+
+        setTimeout(() => { document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+    }
+
+    function triggerChartRender() { renderChart(globalInvestable, currentMode); }
+
+    function renderChart(principal, mode) {
+        const ctx = document.getElementById('wealthChart').getContext('2d');
+        if(wealthChartInstance) wealthChartInstance.destroy();
+
+        const isStepUp = document.getElementById('chart-stepup') ? document.getElementById('chart-stepup').checked : false;
+        const isInflation = document.getElementById('chart-inflation') ? document.getElementById('chart-inflation').checked : false;
+        const shockVal = parseFloat(document.getElementById('shock-val') ? document.getElementById('shock-val').value : 0);
+
+        const labels = ['Year 1', 'Year 3', 'Year 5', 'Year 7', 'Year 10'];
+        const data = [];
+        const rate = 0.12; 
+        const inflationRate = 0.06;
+
+        if (mode === 'salary') {
+            let balance = 0; let currentSip = principal; const monthlyRate = rate / 12;
+            for (let m = 1; m <= 120; m++) {
+                balance = (balance + currentSip) * (1 + monthlyRate);
+                if (m % 12 === 0 && isStepUp) currentSip *= 1.10; 
+                // Apply Life Event Shock at exactly Year 5 (month 60)
+                if (m === 60 && shockVal > 0) balance = Math.max(0, balance - shockVal);
+
+                if (m % 12 === 0 && [1,3,5,7,10].includes(m/12)) {
+                    let val = balance;
+                    if(isInflation) val = val / Math.pow(1 + inflationRate, m/12);
+                    data.push(Math.round(val));
+                }
+            }
+        } else {
+            for (let y = 1; y <= 10; y++) {
+                let val = principal * Math.pow(1 + rate, y);
+                // Apply Life Event Shock at Year 5
+                if (y >= 5 && shockVal > 0) {
+                    // Backcalculate the shock effect
+                    let grownShock = shockVal * Math.pow(1+rate, y-5);
+                    val = Math.max(0, val - grownShock);
+                }
+                if([1,3,5,7,10].includes(y)) {
+                    if(isInflation) val = val / Math.pow(1 + inflationRate, y);
+                    data.push(Math.round(val));
+                }
+            }
+        }
+
+        Chart.defaults.color = '#9ca3af'; Chart.defaults.font.family = 'Outfit';
+        wealthChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `Projected Wealth (${currentSymbol})`, data: data,
+                    borderColor: '#fbbf24', backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                    borderWidth: 3, pointBackgroundColor: '#10b981', pointRadius: 5, fill: true, tension: 0.4
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } }
+        });
+    }
+</script>
+
+</body>
+</html>
